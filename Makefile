@@ -24,9 +24,15 @@ opt: nginx passenger
 	cp -r test/* opt
 
 install: nginx passenger
+# Backup /etc/nginx if it exists
+	[ -d /etc/nginx ] && mv /etc/nginx /etc/nginx.backup || true
+# Run the Passenger installation with Nginx module
 	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \
 	--nginx-source-dir=./nginx --prefix=/usr/local \
 	"--extra-configure-flags=--sbin-path=/usr/local/sbin/nginx --modules-path=/usr/local/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/lib/nginx/tmp/client_body --http-proxy-temp-path=/var/lib/nginx/tmp/proxy --http-fastcgi-temp-path=/var/lib/nginx/tmp/fastcgi --http-uwsgi-temp-path=/var/lib/nginx/tmp/uwsgi --http-scgi-temp-path=/var/lib/nginx/tmp/scgi --pid-path=/run/nginx.pid --lock-path=/run/lock/subsys/nginx $(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
+# Restore the /etc/nginx directory if it was backed up
+	[ -d /etc/nginx.backup ] && rm -rf /etc/nginx && mv /etc/nginx.backup /etc/nginx || true
+# Create necessary directories and set permissions
 	mkdir -p /usr/local/lib64/nginx/modules /var/log/nginx /var/lib/nginx/tmp/{client_body,fastcgi,proxy,scgi,uwsgi}
 	getent group nginx > /dev/null || groupadd -r nginx && id -u nginx > /dev/null 2>&1 || useradd -r -g nginx -s /sbin/nologin -d /nonexistent -c "nginx user" nginx
 	chmod 0700 -R /var/log/nginx /var/lib/nginx/
