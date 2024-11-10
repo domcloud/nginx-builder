@@ -16,6 +16,7 @@ passenger:
 	@echo "passenger folder not found. Cloning from GitHub..."
 	git clone https://github.com/phusion/passenger.git --filter=tree:0 passenger
 	cd passenger && git submodule update --init --recursive
+	cd passenger && git apply ../passenger.diff
 
 opt: nginx passenger
 	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \

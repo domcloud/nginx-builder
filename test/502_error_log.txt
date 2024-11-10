@@ -1,2 +1,0 @@
-Sun Nov 10 09:39:33 WIB 2024 - 502 error started
-Sun Nov 10 09:39:39 WIB 2024 - 502 error lasted for 6024 milliseconds
