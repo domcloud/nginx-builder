@@ -37,8 +37,12 @@ if [[ ${#folders[@]} -gt 1 ]]; then
       # Attempt to kill the process
       if kill "$pid" 2>/dev/null; then
         echo "Killed PID $pid in $folder"
+      elif ! kill -0 "$pid" 2>/dev/null; then
+        # Check if the process still exists
+        echo "Process $pid not found, deleting folder $folder"
+        rm -rf "$folder"
       else
-        echo "Failed to kill PID $pid in $folder (process may not exist)"
+        echo "Failed to kill PID $pid in $folder (process may still be running)"
       fi
     else
       echo "No watchdog.pid found in $folder"
