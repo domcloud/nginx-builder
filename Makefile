@@ -1,7 +1,8 @@
 all: opt
 
 NGINX_V := 1.26.2
-NGINX_MODULES := --user=nginx --group=nginx --with-compat --with-debug --with-file-aio --with-http_gunzip_module --with-http_gzip_static_module --with-http_realip_module --with-http_ssl_module --with-http_sub_module --with-http_v2_module --with-http_v3_module --with-pcre --with-pcre-jit --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-threads
+# at this moment we omit --with-http_v3_module due to https://forum.nginx.org/read.php?11,298079
+NGINX_MODULES := --user=nginx --group=nginx --with-compat --with-debug --with-file-aio --with-http_gunzip_module --with-http_gzip_static_module --with-http_realip_module --with-http_ssl_module --with-http_sub_module --with-http_v2_module --with-pcre --with-pcre-jit --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-threads
 NGINX_OPTIMIZATIONS := --with-cc-opt='-O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection' --with-ld-opt='-Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-E'
 
 nginx-$(NGINX_V).tar.gz:
