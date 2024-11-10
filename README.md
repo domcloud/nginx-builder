@@ -15,7 +15,9 @@ make all
 git clone https://github.com/domcloud/nginx-builder/ /usr/local/lib/nginx-builder
 cd /usr/local/lib/nginx-builder/
 make install
+# At this step, remove system nginx
 
+# Rewrite custom NGINX service
 cat <<'EOF' > /usr/lib/systemd/system/nginx.service
 [Unit]
 Description=The nginx HTTP and reverse proxy server
@@ -40,4 +42,7 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 EOF
+systemctl daemon-reload
+# Retain compatibilty with many tools
+ln -s /usr/local/sbin/nginx /usr/sbin/nginx
 ```
