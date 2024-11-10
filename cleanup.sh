@@ -12,6 +12,8 @@ fi
 # Get a list of folders sorted by modification time (newest last)
 folders=($(ls -td "$REGISTRY_DIR"/*/))
 
+current_time=$(date +%s)
+
 # If there is more than one folder, we skip the latest one
 if [[ ${#folders[@]} -gt 1 ]]; then
   # Loop through all folders except the last (newest)
