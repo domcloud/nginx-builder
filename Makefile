@@ -8,7 +8,7 @@ NGINX_OPTIMIZATIONS := --with-cc-opt='-O2 -flto=auto -ffat-lto-objects -fexcepti
 nginx-$(NGINX_V).tar.gz:
 	curl -sSLO "https://www.nginx.org/download/nginx-$(NGINX_V).tar.gz"
 	
-nginx:
+nginx: nginx-$(NGINX_V).tar.gz
 	tar -xzf nginx-$(NGINX_V).tar.gz
 	mv nginx-$(NGINX_V) nginx
 	sed -i 's/ngx_msleep(100)/ngx_msleep(2500)/g' nginx/src/os/unix/ngx_process_cycle.c

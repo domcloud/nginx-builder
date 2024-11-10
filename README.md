@@ -12,5 +12,7 @@ make all
 ## Installing (Rocky Linux)
 
 ```sh
+git clone https://github.com/domcloud/nginx-builder/ /usr/local/lib/nginx-builder
+cd /usr/local/lib/nginx-builder/
 make install
 ```
