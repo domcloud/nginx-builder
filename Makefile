@@ -1,5 +1,4 @@
-all: nginx passenger opt
-install: nginx passenger build
+all: opt
 
 NGINX_V := 1.26.2
 NGINX_MODULES := --user=nginx --group=nginx --with-compat --with-debug --with-file-aio --with-http_gunzip_module --with-http_gzip_static_module --with-http_realip_module --with-http_ssl_module --with-http_sub_module --with-http_v2_module --with-http_v3_module --with-pcre --with-pcre-jit --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-threads
@@ -15,19 +14,23 @@ nginx: nginx-$(NGINX_V).tar.gz
 
 passenger:
 	@echo "passenger folder not found. Cloning from GitHub..."
-	git clone https://github.com/phusion/passenger.git passenger
-	git submodule update --init --recursive
+	git clone https://github.com/phusion/passenger.git --filter=tree:0 passenger
+	cd passenger && git submodule update --init --recursive
 
-opt:
+opt: nginx passenger
 	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \
 	--nginx-source-dir=./nginx --prefix=$(PWD)/opt \
 	"--extra-configure-flags=$(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
 	cp -r test/* opt
 
-build:
+install: nginx passenger
 	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \
 	--nginx-source-dir=./nginx --prefix=/usr/local \
 	"--extra-configure-flags=--sbin-path=/usr/local/sbin/nginx --modules-path=/usr/local/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/lib/nginx/tmp/client_body --http-proxy-temp-path=/var/lib/nginx/tmp/proxy --http-fastcgi-temp-path=/var/lib/nginx/tmp/fastcgi --http-uwsgi-temp-path=/var/lib/nginx/tmp/uwsgi --http-scgi-temp-path=/var/lib/nginx/tmp/scgi --pid-path=/run/nginx.pid --lock-path=/run/lock/subsys/nginx $(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
+	mkdir -p /usr/local/lib64/nginx/modules /var/log/nginx /var/lib/nginx/tmp/{client_body,fastcgi,proxy,scgi,uwsgi}
+	getent group nginx > /dev/null || groupadd -r nginx && id -u nginx > /dev/null 2>&1 || useradd -r -g nginx -s /sbin/nologin -d /nonexistent -c "nginx user" nginx
+	chmod 0700 -R /var/log/nginx /var/lib/nginx/
+	chown -R nginx:root /var/lib/nginx
 
 diff:
 	cd passenger; git diff > ../passenger.diff
