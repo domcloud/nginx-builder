@@ -51,7 +51,7 @@ if [[ ${#folders[@]} -gt 1 ]]; then
       echo "No watchdog.pid found in $folder"
     fi
   done
-elif [[ ${#folders[@]} -eq 1 ]]; then
+elif [[ ${#folders[@]} -gt 0 ]]; then
   echo "No folders to kill processes in, only one PID found which ${folders[0]}"
 else
   echo "Something wrong, trying to restart."
