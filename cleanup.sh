@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Set the registry directory, defaulting to /var/run/passenger-instreg if not set
-REGISTRY_DIR="${PASSENGER_INSTANCE_REGISTRY_DIR:-/var/run/passenger-instreg}"
+REGISTRY_DIR="${REGISTRY_DIR:-/var/run/passenger-instreg}"
+
+CLEANTIME="${CLEANTIME:-60}"
 
 # Check if the directory exists
 if [[ ! -d "$REGISTRY_DIR" ]]; then
@@ -16,6 +18,7 @@ current_time=$(date +%s)
 
 # If there is more than one folder, we skip the latest one
 if [[ ${#folders[@]} -gt 1 ]]; then
+  echo "Alive PID is ${folders[0]}"
   # Loop through all folders except the last (newest)
   for folder in "${folders[@]:1}"; do
     # Get the folder creation time in seconds since epoch
@@ -25,8 +28,8 @@ if [[ ${#folders[@]} -gt 1 ]]; then
     time_diff=$((current_time - folder_time))
 
     # Skip folders created within the last 60 seconds (1 minute)
-    if [[ $time_diff -lt 60 ]]; then
-      echo "Skipping folder $folder, created less than a minute ago."
+    if [[ $time_diff -lt $CLEANTIME ]]; then
+      echo "Skipping folder $folder, created less than $CLEANTIME seconds ago."
       continue
     fi
     # Loop through all folders except the first (newest)
@@ -49,7 +52,7 @@ if [[ ${#folders[@]} -gt 1 ]]; then
     fi
   done
 elif [[ ${#folders[@]} -eq 1 ]]; then
-  echo "No folders to kill processes in, only one instance found."
+  echo "No folders to kill processes in, only one PID found which ${folders[0]}"
 else
   echo "Something wrong, trying to restart."
   systemctl restart nginx

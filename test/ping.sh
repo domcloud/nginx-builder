@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # URL of the website to monitor
-URL="https://sgp.domcloud.co/ssh/"  # Replace with the website you want to monitor
+URL="http://localhost:8090"  # Replace with the website you want to monitor
 
 # Log file to store the 502 error duration
 LOG_FILE="502_error_log.txt"
@@ -30,9 +30,10 @@ log_502_error_duration() {
 }
 
 # Main loop to monitor the website
+echo "brghin" > "$LOG_FILE"
 while true; do
   status_code=$(get_status_code)
-  if [[ "$status_code" -eq 502 ]]; then
+  if [[ "$status_code" -gt 500 ]]; then
     # If we encounter a 502 error, track the start time
     if [ "$in_502_error" = false ]; then
       in_502_error=true
