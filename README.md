@@ -4,7 +4,7 @@ This repo contains specific patches to avoid brief 502 Gateway Problem when NGIN
 
 It works, but leaves PassengerAgent leaks over time because [the reap function](./passenger.diff) is commented out. To solve it, you need to put [the cleanup script](./cleanup.sh) in the cronjob.
 
-This will builds NGINX from source. To make it more performant. We also add BoringSSL + HTTP v3 build.
+This will builds NGINX from source. To make it more performant. We also add LibreSSL + HTTP v3 build.
 
 ## Building
 

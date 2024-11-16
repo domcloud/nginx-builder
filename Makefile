@@ -1,8 +1,9 @@
 all: opt
 
 NGINX_V := 1.26.2
-NGINX_MODULES := --user=nginx --group=nginx --with-compat --with-debug --with-file-aio --with-http_gunzip_module --with-http_gzip_static_module --with-http_realip_module --with-http_ssl_module --with-http_sub_module --with-http_v2_module --with-http_v3_module --with-pcre --with-pcre-jit --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-threads --with-openssl="../boringssl"
-NGINX_OPTIMIZATIONS := --with-cc-opt='-I../boringssl/.openssl/include -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection' --with-ld-opt='-L../boringssl/.openssl/lib -Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-E'
+LIBRE_V := 4.0.0
+NGINX_MODULES := --user=nginx --group=nginx --with-compat --with-debug --with-file-aio --with-http_gunzip_module --with-http_gzip_static_module --with-http_realip_module --with-http_ssl_module --with-http_sub_module --with-http_v2_module --with-http_v3_module --with-pcre --with-pcre-jit --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-threads --with-openssl="../libressl"
+NGINX_OPTIMIZATIONS := --with-cc-opt='-I../libressl/build/include -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection' --with-ld-opt='-L../libressl/build/lib -Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-E'
 
 nginx-$(NGINX_V).tar.gz:
 	curl -sSLO "https://www.nginx.org/download/nginx-$(NGINX_V).tar.gz"
@@ -11,6 +12,14 @@ nginx: nginx-$(NGINX_V).tar.gz
 	tar -xzf nginx-$(NGINX_V).tar.gz
 	mv nginx-$(NGINX_V) nginx
 	sed -i 's/ngx_msleep(100)/ngx_msleep(500)/g' nginx/src/os/unix/ngx_process_cycle.c
+
+libressl-$(LIBRE_V).tar.gz:
+	wget https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-$(LIBRE_V).tar.gz
+
+libressl: libressl-$(LIBRE_V).tar.gz
+	tar -xzf libressl-$(LIBRE_V).tar.gz
+	mv libressl-$(LIBRE_V) libressl
+	cd libressl && cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release && ninja -C build
 
 passenger:
 	@echo "passenger folder not found. Cloning from GitHub..."
@@ -24,13 +33,13 @@ boringssl:
 	mkdir -p boringssl/.openssl/lib && cd boringssl/.openssl && ln -s ../include include
 	cd boringssl && cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib
 
-opt: nginx passenger boringssl
-	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \
+opt: nginx passenger libressl
+	./passenger/bin/passenger-install-nginx-module --auto --languages= \
 	--nginx-source-dir=./nginx --prefix=$(PWD)/opt \
 	"--extra-configure-flags=$(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
 	cp -r test/* opt
 
-install: nginx passenger boringssl
+install: nginx passenger libressl
 # Backup /etc/nginx if it exists
 	[ -d /etc/nginx ] && mv /etc/nginx /etc/nginx.backup || true
 # Run the Passenger installation with Nginx module
