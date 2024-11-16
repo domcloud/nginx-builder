@@ -27,12 +27,6 @@ passenger:
 	cd passenger && git submodule update --init --recursive
 	cd passenger && git apply ../passenger.diff
 
-boringssl:
-	git clone https://boringssl.googlesource.com/boringssl --filter=tree:0 boringssl
-	cd boringssl && cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release && ninja -C build
-	mkdir -p boringssl/.openssl/lib && cd boringssl/.openssl && ln -s ../include include
-	cd boringssl && cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib
-
 opt: nginx passenger libressl
 	./passenger/bin/passenger-install-nginx-module --auto --languages= \
 	--nginx-source-dir=./nginx --prefix=$(PWD)/opt \
