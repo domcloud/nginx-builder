@@ -1,12 +1,12 @@
 #!/bin/bash
 
 killall nginx
-rm -f opt/logs/{access,error,pid}.log
-touch opt/logs/{access,error,pid}.log
+rm -f opt/logs/{access,error,pid,passenger}.log
+touch opt/logs/{access,error,pid,passenger}.log
 ./opt/sbin/nginx
 
 for run in {1..50}; do
-    sleep 1
+    sleep 0.1
     echo "F"
     curl -s -o /dev/null -w "%{http_code}\n" localhost:8090 --max-time 1
     echo "E"

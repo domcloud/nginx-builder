@@ -1,5 +1,17 @@
+diff --git a/src/agent/Core/CoreMain.cpp b/src/agent/Core/CoreMain.cpp
+index 426f0af3..e34490d7 100644
+--- a/src/agent/Core/CoreMain.cpp
++++ b/src/agent/Core/CoreMain.cpp
+@@ -1347,7 +1347,6 @@ runCore() {
+ 		initializeCurl();
+ 		initializeNonPrivilegedWorkingObjects();
+ 		initializeSecurityUpdateChecker();
+-		initializeTelemetryCollector();
+ 		initializeAdminPanelConnector();
+ 		prestartWebApps();
+ 
 diff --git a/src/nginx_module/ngx_http_passenger_module.c b/src/nginx_module/ngx_http_passenger_module.c
-index 7d40f622..2fa0a662 100644
+index 7d40f622..0f550a0f 100644
 --- a/src/nginx_module/ngx_http_passenger_module.c
 +++ b/src/nginx_module/ngx_http_passenger_module.c
 @@ -193,6 +193,29 @@ save_master_process_pid(ngx_cycle_t *cycle) {
@@ -16,9 +28,9 @@ index 7d40f622..2fa0a662 100644
 +                        psg_watchdog_launcher_get_instance_dir(psg_watchdog_launcher, NULL));
 +    *last = (u_char) '\0';
 +
-+    f = fopen((const char *) filename, "w");
++    f = fopen((const char *) filename, "a");
 +    if (f != NULL) {
-+        fprintf(f, "%ld", (long) getpid());
++        fprintf(f, "%ld\n", (long) getpid());
 +        fclose(f);
 +    } else {
 +        ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,

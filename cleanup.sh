@@ -27,13 +27,19 @@ if [[ ${#folders[@]} -gt 1 ]]; then
       continue
     fi
 
-    # Read the PID from watchdog.pid
-    nid=$(cat "$folder/web_server_info/child_process.pid")
+    nids=($(grep -v '^$' "$folder/web_server_info/child_process.pid"))
     pid=$(cat "$folder/watchdog.pid")
-    if kill -0 "$nid" 2>/dev/null; then
-      # Check if the process still exists
-      echo "Worker $pid still running so skip $folder"
-    elif ! kill -0 "$pid" 2>/dev/null; then
+
+    # Check if any of the PIDs exist
+    for nid in "${nids[@]}"; do
+      if [[ -n "$nid" ]] && kill -0 "$nid" 2>/dev/null; then
+        # If any PID exists, skip the folder
+        echo "Worker $pid still running so skip $folder"
+        continue 2  # Skip further processing for this folder
+      fi
+    done
+
+    if ! kill -0 "$pid" 2>/dev/null; then
       # Check if the process still exists
       echo "Process $pid not found, deleting folder $folder"
       rm -rf "$folder"
