@@ -1,8 +1,38 @@
 diff --git a/src/nginx_module/ngx_http_passenger_module.c b/src/nginx_module/ngx_http_passenger_module.c
-index 7d40f622a..1c62f5bf7 100644
+index 7d40f622..2fa0a662 100644
 --- a/src/nginx_module/ngx_http_passenger_module.c
 +++ b/src/nginx_module/ngx_http_passenger_module.c
-@@ -509,7 +509,6 @@ pre_config_init(ngx_conf_t *cf)
+@@ -193,6 +193,29 @@ save_master_process_pid(ngx_cycle_t *cycle) {
+     return NGX_OK;
+ }
+ 
++static ngx_int_t
++save_child_process_pid(ngx_cycle_t *cycle) {
++    u_char filename[NGX_MAX_PATH];
++    u_char *last;
++    FILE *f;
++
++    last = ngx_snprintf(filename, sizeof(filename) - 1, "%s/web_server_info/child_process.pid",
++                        psg_watchdog_launcher_get_instance_dir(psg_watchdog_launcher, NULL));
++    *last = (u_char) '\0';
++
++    f = fopen((const char *) filename, "w");
++    if (f != NULL) {
++        fprintf(f, "%ld", (long) getpid());
++        fclose(f);
++    } else {
++        ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
++                      "could not create %s", filename);
++    }
++
++    return NGX_OK;
++}
++
++
+ typedef struct {
+     ngx_cycle_t *cycle;
+     int log_fd;
+@@ -509,7 +532,6 @@ pre_config_init(ngx_conf_t *cf)
  {
      char *error_message;
  
@@ -10,7 +40,7 @@ index 7d40f622a..1c62f5bf7 100644
  
      ngx_memzero(&passenger_main_conf, sizeof(passenger_main_conf_t));
      pp_schema_string.data = (u_char *) "passenger:";
-@@ -567,15 +566,8 @@ init_module(ngx_cycle_t *cycle) {
+@@ -567,15 +589,9 @@ init_module(ngx_cycle_t *cycle) {
   */
  static ngx_int_t
  init_worker_process(ngx_cycle_t *cycle) {
@@ -23,6 +53,7 @@ index 7d40f622a..1c62f5bf7 100644
 -        if (core_conf->master) {
 -            psg_watchdog_launcher_detach(psg_watchdog_launcher);
 -        }
++        save_child_process_pid(cycle);
      }
      return NGX_OK;
  }

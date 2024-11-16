@@ -13,6 +13,7 @@ fi
 
 # Get a list of folders sorted by modification time (newest last)
 folders=($(ls -td "$REGISTRY_DIR"/*/))
+# folders=($(find $REGISTRY_DIR -mindepth 1 -maxdepth 1 -type d ! -lname '*' -exec stat --format='%Y %n' {} + | sort -n | awk '{print $2}'))
 
 current_time=$(date +%s)
 
@@ -32,23 +33,28 @@ if [[ ${#folders[@]} -gt 1 ]]; then
       echo "Skipping folder $folder, created less than $CLEANTIME seconds ago."
       continue
     fi
-    # Loop through all folders except the first (newest)
-    if [[ -f "$folder/watchdog.pid" ]]; then
-      # Read the PID from watchdog.pid
-      pid=$(cat "$folder/watchdog.pid")
-      
-      # Attempt to kill the process
-      if kill "$pid" 2>/dev/null; then
-        echo "Killed PID $pid in $folder"
-      elif ! kill -0 "$pid" 2>/dev/null; then
-        # Check if the process still exists
-        echo "Process $pid not found, deleting folder $folder"
-        rm -rf "$folder"
-      else
-        echo "Failed to kill PID $pid in $folder (process may still be running)"
-      fi
-    else
+    if [[ ! -f "$folder/watchdog.pid" ]]; then
       echo "No watchdog.pid found in $folder"
+    fi
+    if [[ ! -f "$folder/web_server_info/child_process.pid" ]]; then
+      echo "No child_process.pid found in $folder"
+    fi
+
+    # Read the PID from watchdog.pid
+    nid=$(cat "$folder/web_server_info/child_process.pid")
+    pid=$(cat "$folder/watchdog.pid")
+    if kill -0 "$nid" 2>/dev/null; then
+      # Check if the process still exists
+      echo "Worker $pid still running so skip $folder"
+    elif ! kill -0 "$pid" 2>/dev/null; then
+      # Check if the process still exists
+      echo "Process $pid not found, deleting folder $folder"
+      rm -rf "$folder"
+    else
+      kill $pid
+      tail --pid=$pid -f /dev/null
+      echo "Killed PID $pid in $folder"
+      rm -rf "$folder"
     fi
   done
 elif [[ ${#folders[@]} -gt 0 ]]; then
