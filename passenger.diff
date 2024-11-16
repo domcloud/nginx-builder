@@ -1,15 +1,3 @@
-diff --git a/bin/passenger-install-nginx-module b/bin/passenger-install-nginx-module
-index 08eb1d29..18bc75df 100755
---- a/bin/passenger-install-nginx-module
-+++ b/bin/passenger-install-nginx-module
-@@ -479,6 +479,7 @@ def install_nginx(source_dir, prefix, extra_configure_flags)
-       new_screen
-       puts "<banner>Compiling and installing Nginx...</banner>"
-       if !sh(build_nginx_configure_command(prefix, extra_configure_flags)) ||
-+         !sh("touch ../boringssl/.openssl/include/openssl/ssl.h") ||
-          !sh("make") ||
-          !sh("make install")
-         return false
 diff --git a/src/nginx_module/ngx_http_passenger_module.c b/src/nginx_module/ngx_http_passenger_module.c
 index 7d40f622..2fa0a662 100644
 --- a/src/nginx_module/ngx_http_passenger_module.c
