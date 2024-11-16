@@ -23,7 +23,6 @@ boringssl:
 	cd boringssl && cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release && ninja -C build
 	mkdir -p boringssl/.openssl/lib && cd boringssl/.openssl && ln -s ../include include
 	cd boringssl && cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib
-	touch boringssl/.openssl/include/openssl/ssl.h
 
 opt: nginx passenger boringssl
 	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \
