@@ -1,9 +1,8 @@
 all: opt
 
 NGINX_V := 1.26.2
-# at this moment we omit --with-http_v3_module due to https://forum.nginx.org/read.php?11,298079
-NGINX_MODULES := --user=nginx --group=nginx --with-compat --with-debug --with-file-aio --with-http_gunzip_module --with-http_gzip_static_module --with-http_realip_module --with-http_ssl_module --with-http_sub_module --with-http_v2_module --with-pcre --with-pcre-jit --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-threads
-NGINX_OPTIMIZATIONS := --with-cc-opt='-O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection' --with-ld-opt='-Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-E'
+NGINX_MODULES := --user=nginx --group=nginx --with-compat --with-debug --with-file-aio --with-http_gunzip_module --with-http_gzip_static_module --with-http_realip_module --with-http_ssl_module --with-http_sub_module --with-http_v2_module --with-http_v3_module --with-pcre --with-pcre-jit --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-threads --with-openssl="../boringssl"
+NGINX_OPTIMIZATIONS := --with-cc-opt='-I../boringssl/.openssl/include -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection' --with-ld-opt='-L../boringssl/.openssl/lib -Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-E'
 
 nginx-$(NGINX_V).tar.gz:
 	curl -sSLO "https://www.nginx.org/download/nginx-$(NGINX_V).tar.gz"
@@ -11,7 +10,7 @@ nginx-$(NGINX_V).tar.gz:
 nginx: nginx-$(NGINX_V).tar.gz
 	tar -xzf nginx-$(NGINX_V).tar.gz
 	mv nginx-$(NGINX_V) nginx
-	sed -i 's/ngx_msleep(100)/ngx_msleep(2500)/g' nginx/src/os/unix/ngx_process_cycle.c
+	sed -i 's/ngx_msleep(100)/ngx_msleep(500)/g' nginx/src/os/unix/ngx_process_cycle.c
 
 passenger:
 	@echo "passenger folder not found. Cloning from GitHub..."
@@ -19,13 +18,20 @@ passenger:
 	cd passenger && git submodule update --init --recursive
 	cd passenger && git apply ../passenger.diff
 
-opt: nginx passenger
+boringssl:
+	git clone https://boringssl.googlesource.com/boringssl --filter=tree:0 boringssl
+	cd boringssl && cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release && ninja -C build
+	mkdir -p boringssl/.openssl/lib && cd boringssl/.openssl && ln -s ../include include
+	cd boringssl && cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib
+	touch boringssl/.openssl/include/openssl/ssl.h
+
+opt: nginx passenger boringssl
 	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \
 	--nginx-source-dir=./nginx --prefix=$(PWD)/opt \
 	"--extra-configure-flags=$(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
 	cp -r test/* opt
 
-install: nginx passenger
+install: nginx passenger boringssl
 # Backup /etc/nginx if it exists
 	[ -d /etc/nginx ] && mv /etc/nginx /etc/nginx.backup || true
 # Run the Passenger installation with Nginx module
