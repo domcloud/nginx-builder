@@ -22,12 +22,12 @@ if [[ ${#folders[@]} -gt 1 ]]; then
       echo "No watchdog.pid found in $folder"
       continue
     fi
-    if [[ ! -f "$folder/web_server_info/child_process.pid" ]]; then
-      echo "No child_process.pid found in $folder"
+    if [[ ! -f "$folder/web_server_info/child_processes.pid" ]]; then
+      echo "No child_processes.pid found in $folder"
       continue
     fi
 
-    nids=($(grep -v '^$' "$folder/web_server_info/child_process.pid"))
+    nids=($(grep -v '^$' "$folder/web_server_info/child_processes.pid"))
     pid=$(cat "$folder/watchdog.pid")
 
     # Check if any of the PIDs exist
