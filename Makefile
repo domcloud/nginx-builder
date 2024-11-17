@@ -51,3 +51,6 @@ install: nginx passenger libressl
 
 diff:
 	cd passenger; git diff > ../passenger.diff
+
+patch:
+	cd passenger; git reset --hard; git apply ../passenger.diff
