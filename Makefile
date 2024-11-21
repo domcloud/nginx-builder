@@ -48,6 +48,8 @@ install: nginx passenger libressl
 	getent group nginx > /dev/null || groupadd -r nginx && id -u nginx > /dev/null 2>&1 || useradd -r -g nginx -s /sbin/nologin -d /nonexistent -c "nginx user" nginx
 	chmod 0700 -R /var/log/nginx /var/lib/nginx/
 	chown -R nginx:root /var/lib/nginx
+	cp passenger/bin/* /usr/local/bin
+	find /usr/local/bin/passenger* -type f -exec sed -i 's|source_root =.*|source_root = "$(PWD)/passenger"|g' {} +
 
 diff:
 	cd passenger; git diff > ../passenger.diff
