@@ -48,3 +48,11 @@ systemctl daemon-reload
 # Retain compatibilty with many tools
 ln -s /usr/local/sbin/nginx /usr/sbin/nginx
 ```
+
+Then in the NGINX configuration add
+
+```conf
+passenger_root /usr/local/lib/nginx-builder/passenger;
+passenger_ruby /usr/bin/ruby;
+passenger_instance_registry_dir /var/run/passenger-instreg;
+```

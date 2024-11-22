@@ -44,7 +44,7 @@ install: nginx passenger libressl
 # Restore the /etc/nginx directory if it was backed up
 	[ -d /etc/nginx.backup ] && rm -rf /etc/nginx && mv /etc/nginx.backup /etc/nginx || true
 # Create necessary directories and set permissions
-	mkdir -p /usr/local/lib64/nginx/modules /var/log/nginx /var/lib/nginx/tmp/{client_body,fastcgi,proxy,scgi,uwsgi}
+	mkdir -p /usr/local/lib64/nginx/modules /var/log/nginx /var/lib/nginx/tmp/{client_body,fastcgi,proxy,scgi,uwsgi} /etc/nginx/conf.d /var/run/passenger-instreg
 	getent group nginx > /dev/null || groupadd -r nginx && id -u nginx > /dev/null 2>&1 || useradd -r -g nginx -s /sbin/nologin -d /nonexistent -c "nginx user" nginx
 	chmod 0700 -R /var/log/nginx /var/lib/nginx/
 	chown -R nginx:root /var/lib/nginx
