@@ -51,6 +51,10 @@ install: nginx passenger libressl
 	cp passenger/bin/* /usr/local/bin
 	find /usr/local/bin/passenger* -type f -exec sed -i 's|source_root =.*|source_root = "$(PWD)/passenger"|g' {} +
 
+clean:
+	rm -rf libressl/.openssl libressl/build nginx/objs
+	find passenger/buildout -type f \( -name "*.o" -or -name "*.a" \) -exec rm -rf {} +
+
 diff:
 	cd passenger; git diff > ../passenger.diff
 
