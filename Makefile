@@ -20,7 +20,6 @@ libressl-$(LIBRE_V).tar.gz:
 libressl: libressl-$(LIBRE_V).tar.gz
 	tar -xzf libressl-$(LIBRE_V).tar.gz
 	mv libressl-$(LIBRE_V) libressl
-	cd libressl && cmake -GNinja -B build -DCMAKE_BUILD_TYPE=Release && ninja -C build
 
 passenger:
 	@echo "passenger folder not found. Cloning from GitHub..."
@@ -52,7 +51,7 @@ install: nginx passenger libressl
 	find /usr/local/bin/passenger* -type f -exec sed -i 's|source_root =.*|source_root = "$(PWD)/passenger"|g' {} +
 
 clean:
-	rm -rf libressl/.openssl libressl/build nginx/objs
+	rm -rf libressl nginx/objs passenger/buildout/lib*
 	find passenger/buildout -type f \( -name "*.o" -or -name "*.a" \) -exec rm -rf {} +
 
 diff:
