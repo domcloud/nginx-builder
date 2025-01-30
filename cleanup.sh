@@ -51,7 +51,20 @@ if [[ ${#folders[@]} -gt 1 ]]; then
     fi
   done
 elif [[ ${#folders[@]} -gt 0 ]]; then
-  echo "No folders to kill processes in, only one PID found which ${folders[0]}"
+  folder=${folders[0]}
+  if [[ ! -f "$folder/watchdog.pid" ]]; then
+    echo "No watchdog.pid found in $folder"
+  else
+    pid=$(cat "$folder/watchdog.pid")
+    if ! kill -0 "$pid" 2>/dev/null; then
+      # Check if the process still exists
+      echo "The only process $pid is not found, deleting folder $folder and restarting NGINX"
+      rm -rf "$folder"
+      systemctl restart nginx
+    else
+      echo "No folders to kill processes in, only one PID found which ${folders[0]}"
+    fi
+  fi
 else
   echo "Something wrong, trying to restart."
   systemctl restart nginx
