@@ -49,7 +49,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_name: ${{ matrix.config.filename }}.tar.gz
+        asset_name: ${{ matrix.config.filename }}
         asset_path: nginx-builder.tar.gz
         asset_content_type: application/gzip
   release_rocky_assets:
@@ -81,6 +81,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_name: ${{ matrix.config.filename }}.tar.gz
+        asset_name: ${{ matrix.config.filename }}
         asset_path: nginx-builder.tar.gz
         asset_content_type: application/gzip
