@@ -17,10 +17,10 @@ NGINX_DEBIAN_CONFIG := --sbin-path=/usr/local/sbin/nginx --modules-path=/usr/loc
 NGINX_TMP_FEDORA_DIRS := /var/lib/nginx/tmp/{client_body,fastcgi,proxy,scgi,uwsgi}
 NGINX_TMP_DEBIAN_DIRS := /var/lib/nginx/{body,fastcgi,proxy,scgi,uwsgi}
 
-ifeq ($(LINK_OS),ubuntu)
+ifeq ($(LINK_OS),rocky)
 	NGINX_CONFIG := $(NGINX_FEDORA_CONFIG)
 	NGINX_TMP_DIRS := $(NGINX_TMP_FEDORA_DIRS)
-else ifeq ($(LINK_OS),rocky)
+else ifeq ($(LINK_OS),ubuntu)
 	NGINX_CONFIG := $(NGINX_DEBIAN_CONFIG)
 	NGINX_TMP_DIRS := $(NGINX_TMP_DEBIAN_DIRS)
 else
