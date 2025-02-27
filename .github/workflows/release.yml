@@ -15,10 +15,13 @@ jobs:
       uses: actions/checkout@v4
     - name: Install deps
       run: |
-        curl -sSL https://get.rvm.io | bash -s head --ruby
-        source ~/.rvm/scripts/rvm
-        ruby -v
-        gem install json rack rake
+        sudo apt-get install -y libcurl4-openssl-dev
+        sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
+      # run: |
+        # curl -sSL https://get.rvm.io | bash -s head --ruby=3.3.6
+        # source ~/.rvm/scripts/rvm
+        # ruby -v
+        # gem install json rack rake
     - name: Build Binary
       run: make build
     - name: Create Release
