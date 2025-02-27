@@ -23,36 +23,35 @@ jobs:
         release_name: Release ${{ github.event.inputs.version }}
         draft: false
         prerelease: false
-# right now only test rhel
-  # release_ubuntu_assets:
-  #   name: Release Ubuntu 24 Assets
-  #   needs: create_release
-  #   runs-on: ${{ matrix.config.os }}
-  #   strategy:
-  #     matrix:
-  #       config:
-  #         - os: ubuntu-24.04
-  #           filename: nginx-builder-ubuntu-24-amd64.tar.gz
-  #         - os: ubuntu-24.04-arm
-  #           filename: nginx-builder-ubuntu-24-arm64.tar.gz
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-  #   - name: Install deps
-  #     run: |
-  #       sudo apt-get install -y libcurl4-openssl-dev
-  #       sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
-  #   - name: Build Binary
-  #     run: make build
-  #   - name: Upload release assets
-  #     uses: softprops/action-gh-release@v1
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       upload_url: ${{ needs.create_release.outputs.upload_url }}
-  #       asset_name: ${{ matrix.config.filename }}.tar.gz
-  #       asset_path: nginx-builder.tar.gz
-  #       asset_content_type: application/gzip
+  release_ubuntu_assets:
+    name: Release Ubuntu 24 Assets
+    needs: create_release
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - os: ubuntu-24.04
+            filename: nginx-builder-ubuntu-amd64.tar.gz
+          - os: ubuntu-24.04-arm
+            filename: nginx-builder-ubuntu-arm64.tar.gz
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install deps
+      run: |
+        sudo apt-get install -y libcurl4-openssl-dev
+        sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
+    - name: Build Binary
+      run: make build
+    - name: Upload release assets
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_name: ${{ matrix.config.filename }}.tar.gz
+        asset_path: nginx-builder.tar.gz
+        asset_content_type: application/gzip
   release_rocky_assets:
     name: Release Rocky 9 Assets
     needs: create_release
@@ -63,15 +62,17 @@ jobs:
       matrix:
         config:
           - os: ubuntu-24.04
-            filename: nginx-builder-ubuntu-24-amd64.tar.gz
+            filename: nginx-builder-rocky-amd64.tar.gz
           - os: ubuntu-24.04-arm
-            filename: nginx-builder-ubuntu-24-arm64.tar.gz
+            filename: nginx-builder-rocky-arm64.tar.gz
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     - name: Install deps
       run: |
-        yum install git gcc gcc-c++ make
+        dnf group install 'Development tools' -y
+        yum install ruby {libcurl,openssl,zlib,pcre2,ruby}-devel -y
+        ruby /usr/bin/gem install rack rake json
     - name: Build Binary
       run: make build
     - name: Upload release assets

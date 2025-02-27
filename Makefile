@@ -64,6 +64,9 @@ build: nginx passenger libressl
 	--nginx-source-dir=./nginx --prefix=/usr/local/share/nginx --nginx-no-install \
 	"--extra-configure-flags=$(NGINX_CONFIG) $(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
 	cp -a nginx/objs/nginx build/nginx
+	cp -a passenger/buildout build/passenger
+	find build -type f -name "*.o" -delete
+	tar -czvf nginx-builder.tar.gz build
 
 install: nginx passenger libressl
 # Run the Passenger installation with Nginx module
