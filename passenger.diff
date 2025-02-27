@@ -1,5 +1,5 @@
 diff --git a/bin/passenger-install-nginx-module b/bin/passenger-install-nginx-module
-index 07762dcf..b4faa74b 100755
+index 07762dcf..969ad958 100755
 --- a/bin/passenger-install-nginx-module
 +++ b/bin/passenger-install-nginx-module
 @@ -109,6 +109,7 @@ def run_steps
@@ -10,6 +10,15 @@ index 07762dcf..b4faa74b 100755
      if pcre_is_installed?
        @pcre_source_dir = nil
      else
+@@ -133,7 +134,7 @@ def run_steps
+       check_whether_other_nginx_installations_exist(nginx_prefix)
+       extra_nginx_configure_flags = ask_for_extra_nginx_configure_flags(nginx_prefix)
+     end
+-    check_whether_we_can_write_to(nginx_prefix) || exit(1)
++    no_make_install || check_whether_we_can_write_to(nginx_prefix) || exit(1)
+     nginx_config_already_exists_before_installing = nginx_config_exists?(nginx_prefix)
+     if needs_compiling_support_files?
+       if !compile_passenger_support_files
 @@ -141,8 +142,8 @@ def run_steps
          exit(1)
        end
