@@ -14,7 +14,11 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v4
     - name: Install deps
-      run: gem install json rack rake
+      run: |
+        curl -sSL https://get.rvm.io | bash -s head --ruby
+        source ~/.rvm/scripts/rvm
+        ruby -v
+        gem install json rack rake
     - name: Build Binary
       run: make build
     - name: Create Release
