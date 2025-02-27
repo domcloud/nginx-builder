@@ -5,8 +5,11 @@ LIBRE_V := 4.0.0
 PASSENGER_V := 6.0.26
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 HOST_OS := $(shell if [ -f /etc/lsb-release ]; then echo debian; elif [ -f /etc/redhat-release ]; then echo fedora; else echo unknown; fi)
-DOWNLOAD_V ?= "" # option for install with prebuilt GitHub version
+LINK_OS := $(shell if [ -f /etc/lsb-release ]; then echo ubuntu; elif [ -f /etc/redhat-release ]; then echo rocky; else echo unknown; fi)
+LINK_ARCH := $(shell uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
 
+DOWNLOAD_V ?= 0
+DOWNLOAD_URL := https://github.com/domcloud/nginx-builder/releases/download/v$(DOWNLOAD_V)/nginx-builder-$(LINK_OS)-$(LINK_ARCH).tar.gz
 NGINX_PASSENGER_MODULES := --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gzip_static_module --with-http_stub_status_module --with-http_addition_module --add-module='$(ROOT_DIR)passenger/src/nginx_module'
 NGINX_MODULES := --user=nginx --group=nginx --with-compat --with-debug --with-file-aio --with-http_v3_module --with-pcre --with-pcre-jit --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-threads --with-openssl="../libressl"
 NGINX_OPTIMIZATIONS := --with-cc-opt='-I../libressl/build/include -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection' --with-ld-opt='-L../libressl/build/lib -Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-E'
@@ -70,10 +73,20 @@ build: nginx passenger libressl
 
 install: nginx passenger libressl
 # Run the Passenger installation with Nginx module
+ifeq ($(DOWNLOAD_V),0)
+	@echo "Building from source..."
 	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \
 	--nginx-source-dir=./nginx --prefix=/usr/local --nginx-no-install \
 	"--extra-configure-flags=$(NGINX_CONFIG) $(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
-	cp -a nginx/objs/nginx /usr/local/sbin/nginx; chmod +x /usr/local/sbin/nginx
+	cp -a nginx/objs/nginx /usr/local/sbin/nginx
+	cp passenger/bin/* /usr/local/bin
+else
+	@echo "Downloading prebuilt binary for $(LINK_OS)-$(LINK_ARCH)..."
+	curl -sSLo nginx-builder.tar.gz $(DOWNLOAD_URL)
+	tar -xzf nginx-builder.tar.gz
+	cp -a build/nginx /usr/local/sbin/nginx
+	cp -a build/passenger passenger/buildout
+endif
 # Create necessary directories and set permissions
 	mkdir -p /usr/local/lib64/nginx/modules /var/log/nginx $(NGINX_TMP_DIRS) /etc/nginx/conf.d /var/run/passenger-instreg
 	getent group nginx > /dev/null || groupadd -r nginx && id -u nginx > /dev/null 2>&1 || useradd -r -g nginx -s /sbin/nologin -d /nonexistent -c "nginx user" nginx
