@@ -4,11 +4,12 @@ NGINX_V := 1.26.2
 LIBRE_V := 4.0.0
 PASSENGER_V := 6.0.26
 # Added by passenger itself: http_ssl_module http_v2_module http_realip_module http_gzip_static_module http_stub_status_module http_addition_module
+ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+NGINX_PASSENGER_MODULES := --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gzip_static_module --with-http_stub_status_module --with-http_addition_module --add-module='$(ROOT_DIR)passenger/src/nginx_module'
 NGINX_MODULES := --user=nginx --group=nginx --with-compat --with-debug --with-file-aio --with-http_v3_module --with-pcre --with-pcre-jit --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-threads --with-openssl="../libressl"
 NGINX_OPTIMIZATIONS := --with-cc-opt='-I../libressl/build/include -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection' --with-ld-opt='-L../libressl/build/lib -Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-E'
 NGINX_FEDORA_CONFIG := --sbin-path=/usr/local/sbin/nginx --modules-path=/usr/local/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/lib/nginx/tmp/client_body --http-proxy-temp-path=/var/lib/nginx/tmp/proxy --http-fastcgi-temp-path=/var/lib/nginx/tmp/fastcgi --http-uwsgi-temp-path=/var/lib/nginx/tmp/uwsgi --http-scgi-temp-path=/var/lib/nginx/tmp/scgi --pid-path=/run/nginx.pid --lock-path=/run/lock/subsys/nginx
 NGINX_DEBIAN_CONFIG := --sbin-path=/usr/local/sbin/nginx --modules-path=/usr/local/lib/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/lib/nginx/body --http-proxy-temp-path=/var/lib/nginx/proxy --http-fastcgi-temp-path=/var/lib/nginx/fastcgi --http-uwsgi-temp-path=/var/lib/nginx/uwsgi --http-scgi-temp-path=/var/lib/nginx/scgi --pid-path=/run/nginx.pid --lock-path=/var/lock/nginx.lock
-ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 nginx-$(NGINX_V).tar.gz:
 	curl -sSLO "https://www.nginx.org/download/nginx-$(NGINX_V).tar.gz"
@@ -51,7 +52,8 @@ build: nginx passenger libressl
 	cp -a nginx/objs/nginx build/debian/nginx
 	mkdir -p build/fedora
 # For faster build we extract commands from passenger-install-nginx-module
-	cd nginx && sh ./configure --prefix='/usr/local/share/nginx' --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gzip_static_module --with-http_stub_status_module --with-http_addition_module --add-module='$(ROOT_DIR)passenger/src/nginx_module' $(NGINX_FEDORA_CONFIG) $(NGINX_MODULES) $(NGINX_OPTIMIZATIONS) && make
+	cd nginx && sh ./configure --prefix='/usr/local/share/nginx' \
+	$(NGINX_PASSENGER_MODULES) $(NGINX_FEDORA_CONFIG) $(NGINX_MODULES) $(NGINX_OPTIMIZATIONS) && make
 	cp -a nginx/objs/nginx build/fedora/nginx
 	cp -a passenger/buildout build/passenger
 	find build -type f -name "*.o" -delete
