@@ -4,7 +4,7 @@ NGINX_V := 1.26.2
 LIBRE_V := 4.0.0
 PASSENGER_V := 6.0.26
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-HOST_OS := $(shell if [ -f /etc/redhat-release ]; then echo fedora; else echo debian; fi)
+HOST_OS := $(shell if [ -f /etc/lsb-release ]; then echo debian; elif [ -f /etc/redhat-release ]; then echo fedora; else echo unknown; fi)
 DOWNLOAD_V ?= "" # option for install with prebuilt GitHub version
 
 NGINX_PASSENGER_MODULES := --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gzip_static_module --with-http_stub_status_module --with-http_addition_module --add-module='$(ROOT_DIR)passenger/src/nginx_module'
@@ -18,7 +18,7 @@ NGINX_TMP_DEBIAN_DIRS := /var/lib/nginx/{body,fastcgi,proxy,scgi,uwsgi}
 ifeq ($(HOST_OS),fedora)
 	NGINX_CONFIG := $(NGINX_FEDORA_CONFIG)
 	NGINX_TMP_DIRS := $(NGINX_TMP_FEDORA_DIRS)
-else ifeq ($(OS),debian)
+else ifeq ($(HOST_OS),debian)
 	NGINX_CONFIG := $(NGINX_DEBIAN_CONFIG)
 	NGINX_TMP_DIRS := $(NGINX_TMP_DEBIAN_DIRS)
 else
