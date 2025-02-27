@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build and Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Check out code
       uses: actions/checkout@v4
@@ -17,13 +17,10 @@ jobs:
       run: |
         sudo apt-get install -y libcurl4-openssl-dev
         sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
-      # run: |
-        # curl -sSL https://get.rvm.io | bash -s head --ruby=3.3.6
-        # source ~/.rvm/scripts/rvm
-        # ruby -v
-        # gem install json rack rake
     - name: Build Binary
       run: make build
+    - name: Check files
+      run: ls
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -41,6 +38,27 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./nginx-builder-x86_64.tar.gz
+        asset_path: nginx-builder.tar.gz
         asset_name: nginx-builder-amd64.tar.gz
         asset_content_type: application/octet-stream
+  build-arm64:
+    name: Build C++ (ARM64)
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          sudo apt-get install -y libcurl4-openssl-dev
+          sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
+      - name: Build Binary (ARM64)
+        run: make build
+      - name: Upload Release Asset (ARM64)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: nginx-builder.tar.gz
+          asset_name: nginx-builder-arm64.tar.gz
+          asset_content_type: application/octet-stream
