@@ -41,6 +41,7 @@ jobs:
       run: |
         sudo apt-get install -y libcurl4-openssl-dev
         sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
+        ls /etc
     - name: Build Binary
       run: make build
     - name: Upload release assets
