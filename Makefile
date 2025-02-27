@@ -19,7 +19,7 @@ nginx: nginx-$(NGINX_V).tar.gz
 	sed -i 's/ngx_msleep(100)/ngx_msleep(500)/g' nginx/src/os/unix/ngx_process_cycle.c
 
 libressl-$(LIBRE_V).tar.gz:
-	wget https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-$(LIBRE_V).tar.gz
+	curl -sSLO https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-$(LIBRE_V).tar.gz
 
 libressl: libressl-$(LIBRE_V).tar.gz
 	rm -rf libressl
