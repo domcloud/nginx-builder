@@ -4,7 +4,6 @@ NGINX_V := 1.26.2
 LIBRE_V := 4.0.0
 PASSENGER_V := 6.0.26
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-HOST_OS := $(shell if [ -f /etc/lsb-release ]; then echo debian; elif [ -f /etc/redhat-release ]; then echo fedora; else echo unknown; fi)
 LINK_OS := $(shell if [ -f /etc/lsb-release ]; then echo ubuntu; elif [ -f /etc/redhat-release ]; then echo rocky; else echo unknown; fi)
 LINK_ARCH := $(shell uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
 
@@ -18,10 +17,10 @@ NGINX_DEBIAN_CONFIG := --sbin-path=/usr/local/sbin/nginx --modules-path=/usr/loc
 NGINX_TMP_FEDORA_DIRS := /var/lib/nginx/tmp/{client_body,fastcgi,proxy,scgi,uwsgi}
 NGINX_TMP_DEBIAN_DIRS := /var/lib/nginx/{body,fastcgi,proxy,scgi,uwsgi}
 
-ifeq ($(HOST_OS),fedora)
+ifeq ($(LINK_OS),ubuntu)
 	NGINX_CONFIG := $(NGINX_FEDORA_CONFIG)
 	NGINX_TMP_DIRS := $(NGINX_TMP_FEDORA_DIRS)
-else ifeq ($(HOST_OS),debian)
+else ifeq ($(LINK_OS),rocky)
 	NGINX_CONFIG := $(NGINX_DEBIAN_CONFIG)
 	NGINX_TMP_DIRS := $(NGINX_TMP_DEBIAN_DIRS)
 else
