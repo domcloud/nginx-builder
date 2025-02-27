@@ -1,5 +1,75 @@
+diff --git a/bin/passenger-install-nginx-module b/bin/passenger-install-nginx-module
+index 07762dcf..b4faa74b 100755
+--- a/bin/passenger-install-nginx-module
++++ b/bin/passenger-install-nginx-module
+@@ -109,6 +109,7 @@ def run_steps
+     check_whether_system_has_enough_ram
+ 
+     download_and_install = should_we_download_and_install_nginx_automatically?
++    no_make_install = should_we_do_not_run_nginx_install?
+     if pcre_is_installed?
+       @pcre_source_dir = nil
+     else
+@@ -141,8 +142,8 @@ def run_steps
+         exit(1)
+       end
+     end
+-    if install_nginx(nginx_source_dir, nginx_prefix, extra_nginx_configure_flags)
+-      if nginx_config_already_exists_before_installing || !locate_nginx_config_file(nginx_prefix)
++    if install_nginx(nginx_source_dir, nginx_prefix, extra_nginx_configure_flags, no_make_install)
++      if no_make_install || nginx_config_already_exists_before_installing || !locate_nginx_config_file(nginx_prefix)
+         show_passenger_config_snippets(nginx_prefix)
+       else
+         insert_passenger_config_snippets(nginx_prefix)
+@@ -265,6 +266,15 @@ def should_we_download_and_install_nginx_automatically?
+     end
+   end
+ 
++  def should_we_do_not_run_nginx_install?
++    if @nginx_no_install
++      puts "<b>Proceeding with no make install.</b>"
++      return true
++    else
++      return false
++    end
++  end
++
+   def download_and_extract_pcre
+     new_screen
+     puts "<banner>PCRE (required by Nginx) not installed, downloading it...</banner>"
+@@ -474,13 +484,17 @@ def nginx_config_exists?(prefix)
+     return !!locate_nginx_config_file(prefix)
+   end
+ 
+-  def install_nginx(source_dir, prefix, extra_configure_flags)
++  def install_nginx(source_dir, prefix, extra_configure_flags, no_make_install)
+     Dir.chdir(source_dir) do
+       new_screen
+-      puts "<banner>Compiling and installing Nginx...</banner>"
++      if no_make_install
++        puts "<banner>Compiling and installing Nginx...</banner>"
++      else
++        puts "<banner>Compiling without installing Nginx...</banner>"
++      end
+       if !sh(build_nginx_configure_command(prefix, extra_configure_flags)) ||
+          !sh("make") ||
+-         !sh("make install")
++         !(no_make_install || sh("make install"))
+         return false
+       end
+     end
+@@ -647,6 +661,9 @@ def boolean_option(name)
+           "#{indent}directory. Conflicts with --auto-download.") do |dir|
+     options[:nginx_source_dir] = dir
+   end
++  opts.on("--nginx-no-install", "Do not install NGINX?") do |dir|
++    options[:nginx_no_install] = true
++  end
+   opts.on("--extra-configure-flags=STRING", String, "Pass these extra flags to Nginx's\n" <<
+           "#{indent}'configure' script, instead of asking for\n" <<
+           "#{indent}it interactively. Specify 'none' if you\n" <<
 diff --git a/src/agent/Core/CoreMain.cpp b/src/agent/Core/CoreMain.cpp
-index 426f0af3..e34490d7 100644
+index 9594201e..3e4cd525 100644
 --- a/src/agent/Core/CoreMain.cpp
 +++ b/src/agent/Core/CoreMain.cpp
 @@ -1347,7 +1347,6 @@ runCore() {
@@ -11,10 +81,10 @@ index 426f0af3..e34490d7 100644
  		prestartWebApps();
  
 diff --git a/src/nginx_module/ngx_http_passenger_module.c b/src/nginx_module/ngx_http_passenger_module.c
-index 7d40f622..b48f01b9 100644
+index 9f4d2383..d9a9b378 100644
 --- a/src/nginx_module/ngx_http_passenger_module.c
 +++ b/src/nginx_module/ngx_http_passenger_module.c
-@@ -193,6 +193,29 @@ save_master_process_pid(ngx_cycle_t *cycle) {
+@@ -192,6 +192,29 @@ save_master_process_pid(ngx_cycle_t *cycle) {
      return NGX_OK;
  }
  

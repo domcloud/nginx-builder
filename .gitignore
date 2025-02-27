@@ -4,5 +4,7 @@ libressl-*.tar.gz
 nginx
 nginx-*.tar.gz
 passenger
+passenger-*.tar.gz
 opt
 *.txt
+build

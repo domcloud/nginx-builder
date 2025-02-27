@@ -8,6 +8,14 @@ This will builds NGINX from source. To make it more performant. We also add Libr
 
 ## Building
 
+First, check if you has Ruby, if not then install it using RVM
+
+```sh
+curl -sSL https://get.rvm.io | bash -s head --ruby
+source ~/.rvm/scripts/rvm
+gem install json rack rake
+```
+
 ```sh
 make all
 ```
