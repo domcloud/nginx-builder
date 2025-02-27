@@ -7,20 +7,12 @@ on:
         description: 'Release version'
         required: true
 jobs:
-  build:
-    name: Build and Release
-    runs-on: ubuntu-24.04
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install deps
-      run: |
-        sudo apt-get install -y libcurl4-openssl-dev
-        sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
-    - name: Build Binary
-      run: make build
-    - name: Check files
-      run: ls
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -31,34 +23,30 @@ jobs:
         release_name: Release ${{ github.event.inputs.version }}
         draft: false
         prerelease: false
-    - name: Upload Release Asset AMD64
-      id: upload-release-asset-amd64
+  release_assets:
+    name: Release assets
+    needs: create_release # we need to know the upload URL
+    runs-on: ${{ matrix.config.os }} # we run many different builds
+    strategy:
+      matrix:
+        config:
+          - os: ubuntu-24.04
+          - os: ubuntu-24.04-arm
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install deps
+      run: |
+        sudo apt-get install -y libcurl4-openssl-dev
+        sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
+    - name: Build Binary
+      run: make build
+    - name: Upload release assets
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_name: nginx-builder-artifacts-${{ matrix.config.os }}
         asset_path: nginx-builder.tar.gz
-        asset_name: nginx-builder-amd64.tar.gz
         asset_content_type: application/octet-stream
-  build-arm64:
-    name: Build C++ (ARM64)
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Install deps
-        run: |
-          sudo apt-get install -y libcurl4-openssl-dev
-          sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
-      - name: Build Binary (ARM64)
-        run: make build
-      - name: Upload Release Asset (ARM64)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: nginx-builder.tar.gz
-          asset_name: nginx-builder-arm64.tar.gz
-          asset_content_type: application/octet-stream
