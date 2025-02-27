@@ -54,7 +54,8 @@ build: nginx passenger libressl
 	"--extra-configure-flags=$(NGINX_FEDORA_CONFIG) $(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
 	cp -a nginx/objs/nginx build/fedora/nginx
 	cp -a passenger/buildout build/passenger
-	find build -type f -name "*.o" -delete 
+	find build -type f -name "*.o" -delete
+	tar -czvf nginx-builder-$(uname -m).tar.gz build
 
 install: nginx passenger libressl
 # Run the Passenger installation with Nginx module
