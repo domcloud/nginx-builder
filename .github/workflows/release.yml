@@ -70,7 +70,7 @@ jobs:
       uses: actions/checkout@v4
     - name: Install deps
       run: |
-        yum install gcc gcc-c++ git make redhat-rpm-config
+        yum install gcc gcc-c++ git make redhat-rpm-config -y
         yum install ruby {libcurl,openssl,zlib,pcre2,ruby}-devel -y
         ruby /usr/bin/gem install rack rake json
     - name: Build Binary
