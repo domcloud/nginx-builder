@@ -15,7 +15,7 @@ NGINX_OPTIMIZATIONS := --with-cc-opt='-I../libressl/build/include -O2 -flto=auto
 NGINX_FEDORA_CONFIG := --sbin-path=/usr/local/sbin/nginx --modules-path=/usr/local/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/lib/nginx/tmp/client_body --http-proxy-temp-path=/var/lib/nginx/tmp/proxy --http-fastcgi-temp-path=/var/lib/nginx/tmp/fastcgi --http-uwsgi-temp-path=/var/lib/nginx/tmp/uwsgi --http-scgi-temp-path=/var/lib/nginx/tmp/scgi --pid-path=/run/nginx.pid --lock-path=/run/lock/subsys/nginx
 NGINX_DEBIAN_CONFIG := --sbin-path=/usr/local/sbin/nginx --modules-path=/usr/local/lib/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/lib/nginx/body --http-proxy-temp-path=/var/lib/nginx/proxy --http-fastcgi-temp-path=/var/lib/nginx/fastcgi --http-uwsgi-temp-path=/var/lib/nginx/uwsgi --http-scgi-temp-path=/var/lib/nginx/scgi --pid-path=/run/nginx.pid --lock-path=/var/lock/nginx.lock
 NGINX_FEDORA_DIRS := $(shell echo /var/lib/nginx/tmp/{client_body,fastcgi,passenger,proxy,scgi,uwsgi}) /usr/local/lib64/nginx/modules /etc/nginx/conf.d
-NGINX_DEBIAN_DIRS :=  $(shell echo /var/lib/nginx/{body,fastcgi,passenger,proxy,scgi,uwsgi}) /usr/local/lib/nginx/modules /etc/nginx/sites-{available,enabled}
+NGINX_DEBIAN_DIRS :=  $(shell echo /var/lib/nginx/{body,fastcgi,passenger,proxy,scgi,uwsgi}) /usr/local/lib/nginx/modules /etc/nginx/sites-available /etc/nginx/sites-enabled
 
 ifeq ($(LINK_OS),rocky)
 	NGINX_CONFIG := $(NGINX_FEDORA_CONFIG)
