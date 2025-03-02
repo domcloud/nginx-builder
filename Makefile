@@ -16,6 +16,7 @@ NGINX_FEDORA_CONFIG := --sbin-path=/usr/local/sbin/nginx --modules-path=/usr/loc
 NGINX_DEBIAN_CONFIG := --sbin-path=/usr/local/sbin/nginx --modules-path=/usr/local/lib/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/lib/nginx/body --http-proxy-temp-path=/var/lib/nginx/proxy --http-fastcgi-temp-path=/var/lib/nginx/fastcgi --http-uwsgi-temp-path=/var/lib/nginx/uwsgi --http-scgi-temp-path=/var/lib/nginx/scgi --pid-path=/run/nginx.pid --lock-path=/var/lock/nginx.lock
 NGINX_FEDORA_DIRS := /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/fastcgi /var/lib/nginx/tmp/passenger /var/lib/nginx/tmp/proxy /var/lib/nginx/tmp/scgi /var/lib/nginx/tmp/uwsgi /usr/local/lib64/nginx/modules /etc/nginx/conf.d
 NGINX_DEBIAN_DIRS := /var/lib/nginx/body /var/lib/nginx/fastcgi /var/lib/nginx/passenger /var/lib/nginx/proxy /var/lib/nginx/scgi /var/lib/nginx/uwsgi /usr/local/lib/nginx/modules /etc/nginx/sites-available /etc/nginx/sites-enabled
+NGINX_PREFIX := /usr/local/share/nginx
 
 ifeq ($(LINK_OS),rocky)
 	NGINX_CONFIG := $(NGINX_FEDORA_CONFIG)
@@ -63,7 +64,7 @@ build: nginx passenger libressl
 	rm -rf build
 	mkdir -p build
 	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \
-	--nginx-source-dir=./nginx --prefix=/usr/local/share/nginx --nginx-no-install \
+	--nginx-source-dir=./nginx --prefix=$(NGINX_PREFIX) --nginx-no-install \
 	"--extra-configure-flags=$(NGINX_CONFIG) $(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
 	cp -a nginx/objs/nginx build/nginx
 	cp -a passenger/buildout build/passenger
@@ -75,7 +76,7 @@ install: nginx passenger libressl
 ifeq ($(DOWNLOAD_V),0)
 	@echo "Building from source..."
 	./passenger/bin/passenger-install-nginx-module --auto --languages=ruby,python,nodejs \
-	--nginx-source-dir=./nginx --prefix=/usr/local --nginx-no-install \
+	--nginx-source-dir=./nginx --prefix=$(NGINX_PREFIX) --nginx-no-install \
 	"--extra-configure-flags=$(NGINX_CONFIG) $(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
 	cp -a nginx/objs/nginx /usr/local/sbin/nginx
 	cp passenger/bin/* /usr/local/bin
@@ -87,10 +88,10 @@ else
 	cp -a build/passenger passenger/buildout
 endif
 # Create necessary directories and set permissions
-	mkdir -p /usr/local/share/nginx $(NGINX_STUB_DIRS) /var/log/nginx /var/run/passenger-instreg
+	mkdir -p $(NGINX_PREFIX) $(NGINX_STUB_DIRS) /var/log/nginx /var/run/passenger-instreg
 	getent group nginx > /dev/null || groupadd -r nginx && id -u nginx > /dev/null 2>&1 || useradd -r -g nginx -s /sbin/nologin -d /nonexistent -c "nginx user" nginx
 	chmod 0700 -R /var/log/nginx /var/lib/nginx/
-	chown -R nginx:root /var/lib/nginx
+	chown -R nginx:root /var/lib/nginx $(NGINX_PREFIX)
 	cp passenger/bin/* /usr/local/bin
 	find /usr/local/bin/passenger* -type f -exec sed -i 's|source_root =.*|source_root = "$(PWD)/passenger"|g' {} +
 
