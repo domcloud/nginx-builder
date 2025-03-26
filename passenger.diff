@@ -77,6 +77,53 @@ index 07762dcf..969ad958 100755
    opts.on("--extra-configure-flags=STRING", String, "Pass these extra flags to Nginx's\n" <<
            "#{indent}'configure' script, instead of asking for\n" <<
            "#{indent}it interactively. Specify 'none' if you\n" <<
+diff --git a/src/agent/Core/Controller/SendRequest.cpp b/src/agent/Core/Controller/SendRequest.cpp
+index f1b642c3..01c67d16 100644
+--- a/src/agent/Core/Controller/SendRequest.cpp
++++ b/src/agent/Core/Controller/SendRequest.cpp
+@@ -796,7 +796,6 @@ Controller::constructHeaderBuffersForHttpProtocol(Request *req, struct iovec *bu
+ 
+ 	if (req->https) {
+ 		PUSH_STATIC_BUFFER("X-Forwarded-Proto: https\r\n");
+-		PUSH_STATIC_BUFFER("!~Passenger-Proto: https\r\n");
+ 	}
+ 
+ 	if (cache.remoteAddr != NULL && cache.remoteAddr->size > 0) {
+@@ -815,34 +814,6 @@ Controller::constructHeaderBuffersForHttpProtocol(Request *req, struct iovec *bu
+ 		dataSize += cache.remoteAddr->size;
+ 
+ 		PUSH_STATIC_BUFFER("\r\n");
+-
+-		PUSH_STATIC_BUFFER("!~Passenger-Client-Address: ");
+-
+-		part = cache.remoteAddr->start;
+-		while (part != NULL) {
+-			if (buffers != NULL) {
+-				BEGIN_PUSH_NEXT_BUFFER();
+-				buffers[i].iov_base = (void *) part->data;
+-				buffers[i].iov_len  = part->size;
+-			}
+-			INC_BUFFER_ITER(i);
+-			part = part->next;
+-		}
+-		dataSize += cache.remoteAddr->size;
+-
+-		PUSH_STATIC_BUFFER("\r\n");
+-	}
+-
+-	if (req->envvars != NULL) {
+-		PUSH_STATIC_BUFFER("!~Passenger-Envvars: ");
+-		if (buffers != NULL) {
+-			BEGIN_PUSH_NEXT_BUFFER();
+-			buffers[i].iov_base = (void *) req->envvars->start->data;
+-			buffers[i].iov_len = req->envvars->size;
+-		}
+-		INC_BUFFER_ITER(i);
+-		dataSize += req->envvars->size;
+-		PUSH_STATIC_BUFFER("\r\n");
+ 	}
+ 
+ 	PUSH_STATIC_BUFFER("\r\n");
 diff --git a/src/agent/Core/CoreMain.cpp b/src/agent/Core/CoreMain.cpp
 index 9594201e..3e4cd525 100644
 --- a/src/agent/Core/CoreMain.cpp
