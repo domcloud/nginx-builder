@@ -1,6 +1,6 @@
 all: opt
 
-NGINX_V := 1.26.2
+NGINX_V := 1.26.3
 LIBRE_V := 4.0.0
 PASSENGER_V := 6.0.26
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
