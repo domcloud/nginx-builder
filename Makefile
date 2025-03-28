@@ -84,8 +84,8 @@ else
 	@echo "Downloading prebuilt binary for $(LINK_OS)-$(LINK_ARCH)..."
 	curl -sSLo nginx-builder.tar.gz $(DOWNLOAD_URL)
 	tar -xzf nginx-builder.tar.gz
-	cp -a build/nginx /usr/local/sbin/nginx
-	cp -a build/passenger passenger/buildout
+	cp -af build/nginx /usr/local/sbin/nginx
+	cp -af build/passenger passenger/buildout
 endif
 # Create necessary directories and set permissions
 	mkdir -p $(NGINX_PREFIX) $(NGINX_STUB_DIRS) /var/log/nginx /var/run/passenger-instreg
