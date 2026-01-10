@@ -1,8 +1,8 @@
 all: opt
 
-NGINX_V := 1.26.3
-LIBRE_V := 4.0.0
-PASSENGER_V := 6.0.26
+NGINX_V := 1.28.1
+LIBRE_V := 4.2.1
+PASSENGER_V := 6.1.1
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 LINK_OS := $(shell if [ -f /etc/lsb-release ]; then echo ubuntu; elif [ -f /etc/redhat-release ]; then echo rocky; else echo unknown; fi)
 LINK_ARCH := $(shell uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
