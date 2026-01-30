@@ -55,10 +55,12 @@ passenger: passenger-$(PASSENGER_V).tar.gz
 	cd passenger && git apply ../passenger.diff
 
 opt: nginx passenger libressl
+	rm -rf opt opt.tmp
 	./passenger/bin/passenger-install-nginx-module --auto --languages= \
-	--nginx-source-dir=./nginx --prefix=$(PWD)/opt \
+	--nginx-source-dir=./nginx --prefix=$(PWD)/opt.tmp \
 	"--extra-configure-flags=$(NGINX_MODULES) $(NGINX_OPTIMIZATIONS)"
-	cp -r test/* opt
+	cp -r test/* opt.tmp
+	mv opt.tmp opt
 
 build: nginx passenger libressl
 	rm -rf build

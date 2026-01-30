@@ -16,6 +16,12 @@ source ~/.rvm/scripts/rvm
 gem install json rack rake
 ```
 
+Or Ubuntu APT
+
+```sh
+sudo apt install ruby ruby-dev ruby-json ruby-rack rake
+```
+
 ```sh
 make all
 ```
