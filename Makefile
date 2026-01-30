@@ -84,7 +84,7 @@ ifeq ($(DOWNLOAD_V),0)
 	cp passenger/bin/* /usr/local/bin
 else
 	@echo "Downloading prebuilt binary for $(LINK_OS)-$(LINK_ARCH)..."
-	curl -sSLo nginx-builder.tar.gz $(DOWNLOAD_URL)
+	curl -sSfLo nginx-builder.tar.gz $(DOWNLOAD_URL)
 	tar -xzf nginx-builder.tar.gz
 	cp -af build/nginx /usr/local/sbin/nginx
 	cp -af build/passenger passenger/buildout
