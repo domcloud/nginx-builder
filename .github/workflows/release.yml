@@ -40,7 +40,7 @@ jobs:
     - name: Install deps
       run: |
         sudo apt-get install -y libcurl4-openssl-dev
-        sudo /usr/bin/ruby3.2 /usr/bin/gem install rack
+        sudo /usr/bin/ruby3.3 /usr/bin/gem install rack
     - name: Build Binary
       run: make build
     - name: Upload release assets
