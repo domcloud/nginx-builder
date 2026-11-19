@@ -1,5 +1,5 @@
 diff --git a/bin/passenger-install-nginx-module b/bin/passenger-install-nginx-module
-index 089821f6..a4791faa 100755
+index b80d4db..cde9e4c 100755
 --- a/bin/passenger-install-nginx-module
 +++ b/bin/passenger-install-nginx-module
 @@ -109,6 +109,7 @@ def run_steps
@@ -78,7 +78,7 @@ index 089821f6..a4791faa 100755
            "#{indent}'configure' script, instead of asking for",
            "#{indent}it interactively. Specify 'none' if you",
 diff --git a/src/agent/Core/Controller/SendRequest.cpp b/src/agent/Core/Controller/SendRequest.cpp
-index f1b642c3..01c67d16 100644
+index 6cee9cc..b95d352 100644
 --- a/src/agent/Core/Controller/SendRequest.cpp
 +++ b/src/agent/Core/Controller/SendRequest.cpp
 @@ -796,7 +796,6 @@ Controller::constructHeaderBuffersForHttpProtocol(Request *req, struct iovec *bu
@@ -125,7 +125,7 @@ index f1b642c3..01c67d16 100644
  
  	PUSH_STATIC_BUFFER("\r\n");
 diff --git a/src/agent/Core/CoreMain.cpp b/src/agent/Core/CoreMain.cpp
-index 1749430e..e08c9da7 100644
+index eed218c..f8704ef 100644
 --- a/src/agent/Core/CoreMain.cpp
 +++ b/src/agent/Core/CoreMain.cpp
 @@ -1294,7 +1294,6 @@ runCore() {
@@ -137,7 +137,7 @@ index 1749430e..e08c9da7 100644
  
  		UPDATE_TRACE_POINT();
 diff --git a/src/nginx_module/ngx_http_passenger_module.c b/src/nginx_module/ngx_http_passenger_module.c
-index 5453ad95..46cb4eac 100644
+index 429ffeb..0034cf4 100644
 --- a/src/nginx_module/ngx_http_passenger_module.c
 +++ b/src/nginx_module/ngx_http_passenger_module.c
 @@ -192,6 +192,29 @@ save_master_process_pid(ngx_cycle_t *cycle) {

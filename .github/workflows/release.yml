@@ -30,9 +30,9 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: ubuntu-24.04
+          - os: ubuntu-26.04
             filename: nginx-builder-ubuntu-amd64.tar.gz
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             filename: nginx-builder-ubuntu-arm64.tar.gz
     steps:
     - name: Checkout code
@@ -61,9 +61,9 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: ubuntu-24.04
+          - os: ubuntu-26.04
             filename: nginx-builder-rocky-amd64.tar.gz
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             filename: nginx-builder-rocky-arm64.tar.gz
     steps:
     - name: Checkout code
